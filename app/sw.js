@@ -1,5 +1,5 @@
 
-var cacheID = "restaurant-reviews-v1";
+var cacheID = "restaurant-reviews-v2";
 var cacheURLs = [
       '/',
       '/index.html',
@@ -8,8 +8,7 @@ var cacheURLs = [
       '/js/dbhelper.js',
       '/js/main.js',
       '/js/restaurant_info.js',
-      '/sw.js',
-      '/data/restaurants.json'
+      '/sw.js'
     ]
 
 /* on service worker install event populate the cache */
@@ -30,7 +29,7 @@ self.addEventListener('fetch', function(event) {
         if(!respond || respond.status !== 200 || respond.type !== 'basic') {
           return respond;
         }
-        caches.open('restaurant-reviews-v1').then(function(cache) {
+        caches.open(cacheID).then(function(cache) {
           cache.put(event.request, clone);
         });
         return respond;
