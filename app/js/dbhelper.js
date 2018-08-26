@@ -14,26 +14,14 @@ class DBHelper {
 
 static fetchRestaurants(callback) {
     return fetch(DBHelper.DATABASE_URL)
-    .then(response => response.json())
-    .then(restaurants => callback(null, restaurants));
-  }
-  
-  /**
-   * Fetch all restaurants.
-   
-  static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL)
-    .then(function(response) {
-      const json = response.json();
-      const restaurants = json.restaurants;
-      callback(null, restaurants);
-    })
-    .catch(function(e) {
-      console.log(e);
+    .then(response => response.json())                            // convert to json
+    .then(restaurants => callback(null, restaurants))             // callback(fail, success)
+    .catch(error => {
+      console.log('fetchRestaurants failed: ', error.message);    // error message info
     });
   }
   
-  */
+
   
   /**
    * Fetch all restaurants.
