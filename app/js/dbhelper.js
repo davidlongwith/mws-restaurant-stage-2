@@ -12,18 +12,28 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+static fetchRestaurants(callback) {
+    return fetch(DBHelper.DATABASE_URL)
+    .then(response => response.json())
+    .then(restaurants => callback(null, restaurants));
+  }
+  
   /**
    * Fetch all restaurants.
-   */
+   
   static fetchRestaurants(callback) {
     fetch(DBHelper.DATABASE_URL)
     .then(function(response) {
-      return response.json();
+      const json = response.json();
+      const restaurants = json.restaurants;
+      callback(null, restaurants);
     })
-    .then(function(myJson) {
-      console.log(JSON.stringify(myJson));
+    .catch(function(e) {
+      console.log(e);
     });
   }
+  
+  */
   
   /**
    * Fetch all restaurants.
