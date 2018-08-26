@@ -17,7 +17,7 @@ static fetchRestaurants(callback) {
     .then(response => response.json())                            // convert to json
     .then(restaurants => callback(null, restaurants))             // callback(fail, success)
     .catch(error => {
-      console.log('fetchRestaurants failed: ', error.message);    // error message info
+      console.log('fetchRestaurants failed: ', error.message);    // log error info
     });
   }
   
