@@ -1,9 +1,12 @@
 
-// ---IndexedDB Upgrade Function---
-// *create or remove object stores and indexes here only.
-// .open() returns a promise that can be used later to get/put items in the database
+/**
+ * ---IndexedDB Upgrade Function---
+ * Create or remove object stores and indexes here only.
+ * .open() returns a promise that can be used later to get/put items in the database
+ */
 let dbPromise = idb.open('restaurants-DB', 1, upgradeDB => {                   // (name, version, upgradeCallback)
-  console.log('new object store');
+  console.log('creating new object store: restaurants');
+  upgradeDB.createObjectStore('restaurants', { keyPath: 'name' });       // 'name' property of objects inside the store will be the key
 });
 
 

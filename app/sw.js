@@ -5,6 +5,7 @@ var cacheURLs = [
       '/index.html',
       '/restaurant.html',
       '/css/styles.css',
+      '/js/idb.js',
       '/js/dbhelper.js',
       '/js/main.js',
       '/js/restaurant_info.js',
