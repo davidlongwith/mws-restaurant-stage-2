@@ -12,14 +12,14 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
-static fetchRestaurants(callback) {
-    return fetch(DBHelper.DATABASE_URL)
-    .then(response => response.json())                            // convert to json
-    .then(restaurants => callback(null, restaurants))             // callback(fail, success)
-    .catch(error => {
-      console.log('fetchRestaurants failed: ', error.message);    // log error info
-    });
-  }
+  static fetchRestaurants(callback) {
+      return fetch(DBHelper.DATABASE_URL)
+      .then(response => response.json())                            // convert to json
+      .then(restaurants => callback(null, restaurants))             // callback(fail, success)
+      .catch(error => {
+        console.log('fetchRestaurants failed: ', error.message);    // log error info
+      });
+    }
   
 
   
