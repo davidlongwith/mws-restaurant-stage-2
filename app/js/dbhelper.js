@@ -1,3 +1,14 @@
+
+// ---IndexedDB Upgrade Function---
+// *create or remove object stores and indexes here only.
+// .open() returns a promise that can be used later to get/put items in the database
+let dbPromise = idb.open('restaurants-DB', 1, upgradeDB => {                   // (name, version, upgradeCallback)
+  console.log('new object store');
+});
+
+
+
+
 /**
  * Common database helper functions.
  */
@@ -12,7 +23,9 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  /* fetch all restaurants */
   static fetchRestaurants(callback) {
+    
       return fetch(DBHelper.DATABASE_URL)
       .then(response => response.json())                            // convert to json
       .then(restaurants => callback(null, restaurants))             // callback(fail, success)
