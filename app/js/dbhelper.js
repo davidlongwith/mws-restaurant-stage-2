@@ -7,27 +7,9 @@
 let dbPromise = idb.open('restaurants-DB', 1, upgradeDB => {            // (name, version, upgradeCallback)
   if (!upgradeDB.objectStoreNames.contains('restaurants')) {            // if this object store doesn't exist...
     console.log('creating new object store: restaurants');              // DEBUG
-    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });    // create object store and set key
+    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });      // create object store and set key
   }
 });
-
-/*
-dbPromise.then(db => {                                  // begin a transaction
-let tx = db.transaction('restaurants', 'readwrite');    // setup transaction with these store(s)
-let allRestaurants = tx.objectStore('restaurants');     // select which store to use
-
-allRestaurants.put({                                    // name property is the key (set on store creation)
-  name: 'Sam Mundez',
-  age: 25,
-  favoriteAnimal: 'dog'
-});
-
-return tx.complete;
-})
-.then(() => {
-console.log('Restaurants added');
-});
-*/
 
 /**
  * Common database helper functions.
@@ -45,17 +27,26 @@ class DBHelper {
 
   /* fetch all restaurants */
   static fetchRestaurants(callback) {
-    return fetch(DBHelper.DATABASE_URL)                           // fetch raw data from the server
-    .then(response => response.json())                            // convert to json
-    .then(json => {                                               // use the new json data
-      dbPromise.then(db => {                                      // start a database transaction
-        let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
-        let allRestaurants = tx.objectStore('restaurants');       // select which store to use
-        json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
-        console.log('adding restaurants to database');        // DEBUG
-        return tx.complete;                                   // all steps completed, finalize transaction
-      })
-      return json;                                // return json data for the next part of promise chain
+    return dbPromise
+    .then(db => {
+      let tx = db.transaction('restaurants', 'readonly');
+      let allRestaurants = tx.objectStore('restaurants');
+      return allRestaurants.get('id');
+    })
+    .then(data => {
+      return (data || fetch(DBHelper.DATABASE_URL)                           // fetch raw data from the server
+        .then(response => response.json())                            // convert to json
+        .then(json => {                                               // use the new json data
+          dbPromise.then(db => {                                      // start a database transaction
+            let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
+            let allRestaurants = tx.objectStore('restaurants');       // select which store to use
+            json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
+            console.log('adding restaurants to database');        // DEBUG
+            return tx.complete;                                   // all steps completed, finalize transaction
+          })
+          return json;                                // return json data for the next part of promise chain
+        })
+      )
     })
     .then(restaurants => callback(null, restaurants))             // callback(fail, success)
     .catch(error => {                                             // error in promise chain
