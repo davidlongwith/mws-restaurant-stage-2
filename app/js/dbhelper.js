@@ -31,10 +31,11 @@ class DBHelper {
     .then(db => {
       let tx = db.transaction('restaurants', 'readonly');
       let allRestaurants = tx.objectStore('restaurants');
-      return allRestaurants.get('id');
+      allRestaurants.get('id');
+      return db;
     })
-    .then(data => {
-      return (data || fetch(DBHelper.DATABASE_URL)                           // fetch raw data from the server
+    .then(() => {
+      return fetch(DBHelper.DATABASE_URL)                           // fetch raw data from the server
         .then(response => response.json())                            // convert to json
         .then(json => {                                               // use the new json data
           dbPromise.then(db => {                                      // start a database transaction
@@ -46,7 +47,6 @@ class DBHelper {
           })
           return json;                                // return json data for the next part of promise chain
         })
-      )
     })
     .then(restaurants => callback(null, restaurants))             // callback(fail, success)
     .catch(error => {                                             // error in promise chain
