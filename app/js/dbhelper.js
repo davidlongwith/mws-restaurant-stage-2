@@ -31,8 +31,7 @@ class DBHelper {
     .then(db => {
       let tx = db.transaction('restaurants', 'readonly');
       let allRestaurants = tx.objectStore('restaurants');
-      allRestaurants.get('id');
-      return db;
+      return allRestaurants.get('id');
     })
     .then(() => {
       return fetch(DBHelper.DATABASE_URL)                           // fetch raw data from the server
