@@ -45,19 +45,20 @@ class DBHelper {
 
   /* fetch all restaurants */
   static fetchRestaurants(callback) {
-    return fetch(DBHelper.DATABASE_URL)
+    return fetch(DBHelper.DATABASE_URL)                           // fetch raw data from the server
     .then(response => response.json())                            // convert to json
-    .then(json => {
-      return dbPromise.then(db => {
-        let tx = db.transaction('restaurants', 'readwrite');    // setup transaction with these store(s)
-        let allRestaurants = tx.objectStore('restaurants');     // select which store to use
-        json.forEach(restaurant => allRestaurants.put(restaurant));
-        console.log('Restaurants added');
-        return tx.complete;
+    .then(json => {                                               // use the new json data
+      dbPromise.then(db => {                                      // start a database transaction
+        let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
+        let allRestaurants = tx.objectStore('restaurants');       // select which store to use
+        json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
+        console.log('adding restaurants to database');        // DEBUG
+        return tx.complete;                                   // all steps completed, finalize transaction
       })
+      return json;                                // return json data for the next part of promise chain
     })
     .then(restaurants => callback(null, restaurants))             // callback(fail, success)
-    .catch(error => {
+    .catch(error => {                                             // error in promise chain
       console.log('fetchRestaurants failed: ', error.message);    // log error info
     });
   }
