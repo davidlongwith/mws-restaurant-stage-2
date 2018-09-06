@@ -1,16 +1,33 @@
 
 /**
  * ---IndexedDB Upgrade Function---
- * Create or remove object stores and indexes here only.
+ * Create or remove object stores and indexes here.
  * .open() returns a promise that can be used later to get/put items in the database
- */
-let dbPromise = idb.open('restaurants-DB', 1, upgradeDB => {                   // (name, version, upgradeCallback)
-  console.log('creating new object store: restaurants');
-  upgradeDB.createObjectStore('restaurants', { keyPath: 'name' });       // 'name' property of objects inside the store will be the key
+ */ 
+let dbPromise = idb.open('restaurants-DB', 1, upgradeDB => {            // (name, version, upgradeCallback)
+  if (!upgradeDB.objectStoreNames.contains('restaurants')) {            // if this object store doesn't exist...
+    console.log('creating new object store: restaurants');              // DEBUG
+    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });    // create object store and set key
+  }
 });
 
+/*
+dbPromise.then(db => {                                  // begin a transaction
+let tx = db.transaction('restaurants', 'readwrite');    // setup transaction with these store(s)
+let allRestaurants = tx.objectStore('restaurants');     // select which store to use
 
+allRestaurants.put({                                    // name property is the key (set on store creation)
+  name: 'Sam Mundez',
+  age: 25,
+  favoriteAnimal: 'dog'
+});
 
+return tx.complete;
+})
+.then(() => {
+console.log('Restaurants added');
+});
+*/
 
 /**
  * Common database helper functions.
@@ -28,20 +45,26 @@ class DBHelper {
 
   /* fetch all restaurants */
   static fetchRestaurants(callback) {
-    
-      return fetch(DBHelper.DATABASE_URL)
-      .then(response => response.json())                            // convert to json
-      .then(restaurants => callback(null, restaurants))             // callback(fail, success)
-      .catch(error => {
-        console.log('fetchRestaurants failed: ', error.message);    // log error info
-      });
-    }
+    return fetch(DBHelper.DATABASE_URL)
+    .then(response => response.json())                            // convert to json
+    .then(json => {
+      return dbPromise.then(db => {
+        let tx = db.transaction('restaurants', 'readwrite');    // setup transaction with these store(s)
+        let allRestaurants = tx.objectStore('restaurants');     // select which store to use
+        json.forEach(restaurant => allRestaurants.put(restaurant));
+        console.log('Restaurants added');
+        return tx.complete;
+      })
+    })
+    .then(restaurants => callback(null, restaurants))             // callback(fail, success)
+    .catch(error => {
+      console.log('fetchRestaurants failed: ', error.message);    // log error info
+    });
+  }
   
 
-  
   /**
    * Fetch all restaurants.
-   
   static fetchRestaurants(callback) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', DBHelper.DATABASE_URL);
@@ -57,7 +80,6 @@ class DBHelper {
     };
     xhr.send();
   }
-  
   */
 
   /**
