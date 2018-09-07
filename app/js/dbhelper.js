@@ -33,20 +33,23 @@ class DBHelper {
       let allRestaurants = tx.objectStore('restaurants');
       return allRestaurants.getAll();
     })
-    .then((data) => { console.log('database contents: ', data);})
-    .then(() => {
+    .then(data => {
+      console.log('database contents: ', data);
+      if (data.length > 0) {
+        return data;
+      }
       return fetch(DBHelper.DATABASE_URL)                          // fetch raw data from the server
-        .then(response => response.json())                            // convert to json
-        .then(json => {                                               // use the new json data
-          dbPromise.then(db => {                                      // start a database transaction
-            let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
-            let allRestaurants = tx.objectStore('restaurants');       // select which store to use
-            json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
-            console.log('adding restaurants to database');        // DEBUG
-            return tx.complete;                                   // all steps completed, finalize transaction
-          })
-          return json;                                // return promise json data
-        }) 
+      .then(response => response.json())                            // convert to json
+      .then(json => {                                               // use the new json data
+        dbPromise.then(db => {                                      // start a database transaction
+          let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
+          let allRestaurants = tx.objectStore('restaurants');       // select which store to use
+          json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
+          console.log('adding restaurants to database');        // DEBUG
+          return tx.complete;                                   // all steps completed, finalize transaction
+        })
+        return json;                                // return promise json data
+      })
     })
     .then(restaurants => callback(null, restaurants))             // callback(fail, success)
     .catch(error => {                                             // error in promise chain
