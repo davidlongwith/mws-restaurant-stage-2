@@ -39,29 +39,28 @@ class DBHelper {
 
   /* fetch all restaurants */
   static fetchRestaurants(callback) {
-    DBHelper.DBGetRestaurants()
-    .then(data => {
+    DBHelper.DBGetRestaurants().then(data => {
       console.log('database contents: ', data);
       if (data.length > 0) {
-        return data;
+        return callback(null, data);
       }
+      
       console.log('fetching from server');
-      return fetch(DBHelper.DATABASE_URL)                          // fetch raw data from the server
+      fetch(DBHelper.DATABASE_URL)                          // fetch new data from the server
       .then(response => response.json())                            // convert to json
-      .then(json => {                                               // use the new json data
+      .then(data => {                                               // use the new json data
         DBHelper.DBOpen().then(db => {                                      // start a database transaction
           let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
           let allRestaurants = tx.objectStore('restaurants');       // select which store to use
-          json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
-          console.log('adding restaurants to database');        // DEBUG
+          data.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
           return tx.complete;                                   // all steps completed, finalize transaction
         })
-        return json;                                // return promise json data
-      })
-    })
-    .then(restaurants => callback(null, restaurants))             // callback(fail, success)
-    .catch(error => {                                             // error in promise chain
-      console.log('fetchRestaurants failed: ', error.message);    // log error info
+        console.log('adding to database: ', data);
+        return callback(null, data);                                // return promise; callback(fail, success)
+      })           
+      .catch(error => {                                             // error in promise chain
+        console.log('fetchRestaurants failed: ', error.message);    // log error info
+      });
     });
   }
   
