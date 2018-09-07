@@ -1,17 +1,5 @@
 
 /**
- * ---IndexedDB Upgrade Function---
- * Create or remove object stores and indexes here.
- * .open() returns a promise that can be used later to get/put items in the database
- */ 
-let dbPromise = idb.open('restaurants-DB', 1, upgradeDB => {            // (name, version, upgradeCallback)
-  if (!upgradeDB.objectStoreNames.contains('restaurants')) {            // if this object store doesn't exist...
-    console.log('creating new object store: restaurants');              // DEBUG
-    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });      // create object store and set key
-  }
-});
-
-/**
  * Common database helper functions.
  */
 class DBHelper {
@@ -25,9 +13,23 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  /**
+   * ---IndexedDB Upgrade Function---
+   * Create or remove object stores and indexes here.
+   * .open() returns a promise that can be used later to get/put items in the database
+   */
+  static openDB() { 
+    return idb.open('restaurants-DB', 1, upgradeDB => {            // (name, version, upgradeCallback)
+      if (!upgradeDB.objectStoreNames.contains('restaurants')) {            // if this object store doesn't exist...
+        console.log('creating new object store: restaurants');              // DEBUG
+        upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });      // create object store and set key
+      }
+    });
+  }  
+
   /* fetch all restaurants */
   static fetchRestaurants(callback) {
-    return dbPromise
+    return DBHelper.openDB()
     .then(db => {
       let tx = db.transaction('restaurants', 'readonly');
       let allRestaurants = tx.objectStore('restaurants');
@@ -42,7 +44,7 @@ class DBHelper {
       return fetch(DBHelper.DATABASE_URL)                          // fetch raw data from the server
       .then(response => response.json())                            // convert to json
       .then(json => {                                               // use the new json data
-        dbPromise.then(db => {                                      // start a database transaction
+        DBHelper.openDB().then(db => {                                      // start a database transaction
           let tx = db.transaction('restaurants', 'readwrite');      // setup transaction with these store(s)
           let allRestaurants = tx.objectStore('restaurants');       // select which store to use
           json.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
