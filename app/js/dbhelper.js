@@ -38,6 +38,7 @@ class DBHelper {
       if (data.length > 0) {
         return data;
       }
+      console.log('fetching from server');
       return fetch(DBHelper.DATABASE_URL)                          // fetch raw data from the server
       .then(response => response.json())                            // convert to json
       .then(json => {                                               // use the new json data
