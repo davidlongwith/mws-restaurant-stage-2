@@ -39,24 +39,24 @@ class DBHelper {
 
   /* fetch all restaurants (database or server) */
   static fetchRestaurants(callback) {
-    DBHelper.DBGetRestaurants().then(data => {                          // get data from database
-      console.log('database contents: ', data);                         // log existing database content
-      if (data.length > 0) {                                            // if some data is present
-        return callback(null, data);                                    // return promise as callback(fail, success)
+    DBHelper.DBGetRestaurants().then(data => {                    // get data from database
+      console.log('database contents: ', data);                   // log existing database content
+      if (data.length > 0) {                                      // if some data is present
+        return callback(null, data);                              // return promise for callback(null, success)
       }
       
       console.log('fetching from server');                              // log new fetch request
       fetch(DBHelper.DATABASE_URL)                                      // fetch new data from the server
       .then(response => response.json())                                // return converted to json
-      .then(data => {                                                   // use the new json data
-        DBHelper.DBOpen().then(db => {                                  // start a database transaction
-          let tx = db.transaction('restaurants', 'readwrite');          // setup transaction with these store(s)
-          let allRestaurants = tx.objectStore('restaurants');           // select which store to use
-          data.forEach(restaurant => allRestaurants.put(restaurant));   // go through json data and put each restaurant in the database
-          return tx.complete;                                           // all steps completed, finalize transaction
+      .then(fetchedData => {                                                    // use the new json data
+        DBHelper.DBOpen().then(db => {                                          // start a database transaction
+          let tx = db.transaction('restaurants', 'readwrite');                  // setup transaction with these store(s)
+          let allRestaurants = tx.objectStore('restaurants');                   // select which store to use
+          fetchedData.forEach(restaurant => allRestaurants.put(restaurant));    // go through json data and put each restaurant in the database
+          return tx.complete;                                                   // all steps completed, finalize transaction
         })
-        console.log('adding to database: ', data);                      // log new data from fetch request
-        return callback(null, data);                                    // return promise as callback(fail, success)
+        console.log('adding to database: ', fetchedData);                       // log new data from fetch request
+        return callback(null, fetchedData);                                     // return promise for callback(null, success)
       })           
       .catch(error => {                                                 // error in promise chain
         console.log('fetchRestaurants failed: ', error.message);        // log error info
