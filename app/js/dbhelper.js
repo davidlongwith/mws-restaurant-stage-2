@@ -18,7 +18,11 @@ class DBHelper {
    * Create or remove object stores and indexes here.
    * .open() returns a promise that can be used later to get/put items in the database
    */
-  static DBOpen() { 
+  static DBOpen() {
+    if (!navigator.serviceWorker) {   // check brower support for service workers
+      return Promise.resolve();       // stop here and return promise if browser doesn't support sw's
+    }
+  
     return idb.open('restaurants-DB', 1, upgradeDB => {                   // (name, version, upgradeCallback)
       if (!upgradeDB.objectStoreNames.contains('restaurants')) {          // if this object store doesn't exist...
         console.log('creating new object store: restaurants');            // log object store creation
@@ -42,7 +46,7 @@ class DBHelper {
     DBHelper.DBGetRestaurants().then(data => {                    // get data from database
       console.log('database contents: ', data);                   // log existing database content
       if (data.length > 0) {                                      // if some data is present
-        return callback(null, data);                              // return promise for callback(null, success)
+        return data;                                              // return promise
       }
       
       console.log('fetching from server');                              // log new fetch request
@@ -56,8 +60,9 @@ class DBHelper {
           return tx.complete;                                                   // all steps completed, finalize transaction
         })
         console.log('adding to database: ', fetchedData);                       // log new data from fetch request
-        return callback(null, fetchedData);                                     // return promise for callback(null, success)
-      })           
+        return fetchedData;                                                     // return promise
+      })
+      .then((restaurants) => return callback(null, restaurants);)       // callback(null, success)
       .catch(error => {                                                 // error in promise chain
         console.log('fetchRestaurants failed: ', error.message);        // log error info
       });
