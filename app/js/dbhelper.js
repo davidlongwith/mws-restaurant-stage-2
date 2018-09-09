@@ -62,10 +62,10 @@ class DBHelper {
         console.log('adding to database: ', fetchedData);                       // log new data from fetch request
         return fetchedData;                                                     // return promise
       })
-      .then((restaurants) => return callback(null, restaurants);)       // callback(null, success)
-      .catch(error => {                                                 // error in promise chain
-        console.log('fetchRestaurants failed: ', error.message);        // log error info
-      });
+    })
+    .then(restaurants => callback(null, restaurants))                 // callback(fail, success)
+    .catch(error => {                                                 // error in promise chain
+      console.log('fetchRestaurants failed: ', error.message);        // log error info
     });
   }
   
