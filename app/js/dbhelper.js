@@ -46,7 +46,7 @@ class DBHelper {
     DBHelper.DBGetRestaurants().then(data => {                    // get data from database
       console.log('database contents: ', data);                   // log existing database content
       if (data.length > 0) {                                      // if some data is present
-        return data;                                              // return promise
+        return callback(null, data);                              // return promise/function callback
       }
       
       console.log('fetching from server');                              // log new fetch request
@@ -60,10 +60,9 @@ class DBHelper {
           return tx.complete;                                                   // all steps completed, finalize transaction
         })
         console.log('adding to database: ', fetchedData);                       // log new data from fetch request
-        return fetchedData;                                                     // return promise
+        return callback(null, fetchedData);                                     // return promise/function callback
       })
     })
-    .then(restaurants => callback(null, restaurants))                 // callback(fail, success)
     .catch(error => {                                                 // error in promise chain
       console.log('fetchRestaurants failed: ', error.message);        // log error info
     });
